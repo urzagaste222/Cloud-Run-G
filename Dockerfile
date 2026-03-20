@@ -1,4 +1,4 @@
-# Multi-stage build para reducir tamaño
+# Multi-stage build - respeta la estructura existente de badvpn-src
 FROM alpine:3.19 AS builder
 
 RUN apk add --no-cache \
@@ -6,7 +6,8 @@ RUN apk add --no-cache \
     cmake \
     linux-headers
 
-COPY badvpn-src/ /tmp/badvpn-src
+# Copiar todo el directorio badvpn-src con su estructura original
+COPY badvpn-src/ /tmp/badvpn-src/
 
 WORKDIR /tmp/badvpn-src/build
 RUN cmake .. \
@@ -27,7 +28,7 @@ RUN apk add --no-cache \
     bash \
     && rm -rf /var/cache/apk/*
 
-# Copiar binarios compilados
+# Copiar binario compilado de badvpn
 COPY --from=builder /usr/local/bin/badvpn-udpgw /usr/local/bin/
 
 # Crear usuario no privilegiado
@@ -36,20 +37,22 @@ RUN addgroup -g 1000 -S proxy && \
 
 WORKDIR /app
 
-# Copiar archivos con permisos correctos
-COPY --chown=proxy:proxy src/ ./src/
-COPY --chown=proxy:proxy scripts/entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
+# Copiar archivos (manteniendo los nombres originales)
+COPY proxy3.js ./
+COPY run.sh ./
+RUN chmod +x run.sh
+
+# Eliminar código fuente (no necesario en imagen final)
+RUN rm -rf /tmp/badvpn-src
 
 # Configuración por defecto
 ENV PORT=8080 \
-    SSH_PORT=40000 \
-    UDPGW_PORT=7300 \
-    MAX_CLIENTS=250 \
-    PACKETS_SKIP=1
+    DHOST=127.0.0.1 \
+    DPORT=40000 \
+    PACKSKIP=1
 
 EXPOSE ${PORT}
 
 USER proxy
 
-CMD ["./entrypoint.sh"]
+CMD ["./run.sh"]

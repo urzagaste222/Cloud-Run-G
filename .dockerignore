@@ -2,8 +2,7 @@
 .github/
 *.md
 .DS_Store
-node_modules/
-npm-debug.log
-badvpn-src/
-*.tar.gz
 *.log
+badvpn-src/build/   # Solo excluir la carpeta build, no todo badvpn-src
+*.tar.gz
+.DS_Store

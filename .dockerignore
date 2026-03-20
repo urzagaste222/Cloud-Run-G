@@ -1,0 +1,9 @@
+.git/
+.github/
+*.md
+.DS_Store
+node_modules/
+npm-debug.log
+badvpn-src/
+*.tar.gz
+*.log

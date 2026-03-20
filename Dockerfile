@@ -1,4 +1,4 @@
-# Multi-stage build - respeta la estructura existente de badvpn-src
+# Multi-stage build - respeta la estructura existente de badvpn
 FROM alpine:3.19 AS builder
 
 RUN apk add --no-cache \
@@ -7,9 +7,9 @@ RUN apk add --no-cache \
     linux-headers
 
 # Copiar todo el directorio badvpn-src con su estructura original
-COPY badvpn-src/ /tmp/badvpn-src/
+COPY badvpn-src/ /tmp/badvpn/
 
-WORKDIR /tmp/badvpn-src/build
+WORKDIR /tmp/badvpn/build
 RUN cmake .. \
     -DBUILD_NOTHING_BY_DEFAULT=1 \
     -DBUILD_UDPGW=1 \
@@ -43,7 +43,7 @@ COPY run.sh ./
 RUN chmod +x run.sh
 
 # Eliminar código fuente (no necesario en imagen final)
-RUN rm -rf /tmp/badvpn-src
+RUN rm -rf /tmp/badvpn
 
 # Configuración por defecto
 ENV PORT=8080 \

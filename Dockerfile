@@ -38,7 +38,7 @@ RUN addgroup -g 1000 -S proxy && \
 WORKDIR /app
 
 # Copiar archivos del proyecto
-COPY src/proxy3.js ./
+COPY proxy3.js ./
 COPY run.sh ./
 RUN chmod +x run.sh
 

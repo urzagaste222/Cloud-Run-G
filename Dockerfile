@@ -1,13 +1,14 @@
-# Multi-stage build - respeta la estructura existente de badvpn
+# Multi-stage build - sin necesidad de tener badvpn en el repo
 FROM alpine:3.19 AS builder
 
 RUN apk add --no-cache \
     alpine-sdk \
     cmake \
-    linux-headers
+    linux-headers \
+    git
 
-# Copiar todo el directorio badvpn-src con su estructura original
-COPY badvpn-src/ /tmp/badvpn/
+# Clonar badvpn oficial
+RUN git clone https://github.com/ambrop72/badvpn.git /tmp/badvpn
 
 WORKDIR /tmp/badvpn/build
 RUN cmake .. \
@@ -28,24 +29,17 @@ RUN apk add --no-cache \
     bash \
     && rm -rf /var/cache/apk/*
 
-# Copiar binario compilado de badvpn
 COPY --from=builder /usr/local/bin/badvpn-udpgw /usr/local/bin/
 
-# Crear usuario no privilegiado
 RUN addgroup -g 1000 -S proxy && \
     adduser -S -u 1000 -G proxy -h /app -s /bin/false proxy
 
 WORKDIR /app
 
-# Copiar archivos (manteniendo los nombres originales)
 COPY proxy3.js ./
 COPY run.sh ./
 RUN chmod +x run.sh
 
-# Eliminar código fuente (no necesario en imagen final)
-RUN rm -rf /tmp/badvpn
-
-# Configuración por defecto
 ENV PORT=8080 \
     DHOST=127.0.0.1 \
     DPORT=40000 \
